@@ -1,13 +1,15 @@
-# Local RAG Chat - Restaurant Review Q&A System
+# Local RAG Chat - PDF Question & Answer System
 
-A Retrieval-Augmented Generation (RAG) chatbot that answers questions about a pizza restaurant using local LLMs via Ollama. The system uses vector embeddings to retrieve relevant restaurant reviews and generates contextual answers.
+A Retrieval-Augmented Generation (RAG) chatbot that answers questions about PDF documents using local LLMs via Ollama. The system uses vector embeddings to retrieve relevant content from PDFs and generates contextual answers.
 
 ## Features
 
+- **PDF Document Processing**: Automatically loads and processes PDF files
+- **Smart Caching**: Only reloads PDFs when they change, improving performance
+- **Text Chunking**: Intelligently splits large documents into manageable chunks
 - **Local LLM Integration**: Uses Ollama with Llama 3.2 for response generation
 - **Vector Database**: ChromaDB for efficient similarity search
 - **RAG Architecture**: Combines retrieval and generation for accurate, context-aware answers
-- **Restaurant Review Analysis**: Processes and queries restaurant reviews with ratings and dates
 - **Interactive CLI**: Simple command-line interface for asking questions
 
 ## Architecture
@@ -15,16 +17,17 @@ A Retrieval-Augmented Generation (RAG) chatbot that answers questions about a pi
 The project consists of two main components:
 
 1. **Vector Store (`vector.py`)**: 
-   - Loads restaurant reviews from CSV
+   - Loads PDF documents and splits them into chunks
    - Creates embeddings using Ollama's `mxbai-embed-large` model
    - Stores vectors in ChromaDB for fast retrieval
+   - Tracks PDF modification time to avoid unnecessary reloading
    - Provides a retriever interface for similarity search
 
 2. **Chat Interface (`main.py`)**:
    - Interactive Q&A loop
-   - Retrieves relevant reviews based on user questions
+   - Retrieves relevant document chunks based on user questions
    - Generates responses using Llama 3.2 LLM
-   - Combines retrieved context with user queries
+   - Shows source and page numbers for transparency
 
 ## Prerequisites
 
@@ -49,21 +52,28 @@ git clone <repository-url>
 cd local-rag-chat
 ```
 
-2. Install Python dependencies:
+2. Create and activate a virtual environment (recommended):
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install Python dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Ensure your restaurant reviews CSV file is in the project directory:
-   - File: `realistic_restaurant_reviews.csv`
-   - Required columns: `Title`, `Review`, `Rating`, `Date`
+4. Place your PDF file in the project directory:
+   - Default filename: `sample.pdf`
+   - You can change this in `vector.py`
 
 ## Usage
 
 1. **First Run** (Vector Store Creation):
-   - On first run, the system will create the vector database
-   - Reviews will be embedded and stored in `./chroma_langchain_db/`
-   - This process may take a few minutes depending on dataset size
+   - On first run, the system will process your PDF
+   - Text will be extracted, chunked, embedded, and stored in `./chroma_langchain_db/`
+   - PDF metadata is saved in `pdf_metadata.json` to track changes
+   - This process may take a few minutes depending on PDF size
 
 2. **Start the Chat Interface**:
 ```bash
@@ -72,26 +82,40 @@ python main.py
 
 3. **Ask Questions**:
 ```
-Question: What do customers say about the pizza quality?
-Question: Are there any complaints about service?
-Question: What are the most common positive reviews?
+Question: What is the main topic of this document?
+Question: Can you summarize the key points?
+Question: What does it say about [specific topic]?
 ```
 
 4. **Exit**: Type `q` to quit the application
+
+## Smart Caching
+
+The system automatically detects when your PDF has changed:
+- **Same PDF**: Uses cached embeddings (instant startup)
+- **Modified PDF**: Automatically reloads and re-embeds the document
+- **New PDF**: Replace `sample.pdf` and the system will detect the change
 
 ## Project Structure
 
 ```
 local-rag-chat/
-├── main.py                          # Main chat interface
-├── vector.py                        # Vector store setup and retriever
-├── requirements.txt                 # Python dependencies
-├── realistic_restaurant_reviews.csv # Restaurant reviews dataset
-├── chroma_langchain_db/            # ChromaDB vector store (auto-generated)
-└── README.md                        # This file
+├── main.py                    # Main chat interface
+├── vector.py                  # Vector store setup and retriever
+├── requirements.txt           # Python dependencies
+├── sample.pdf                 # Your PDF document
+├── pdf_metadata.json          # PDF change tracking (auto-generated)
+├── chroma_langchain_db/       # ChromaDB vector store (auto-generated)
+└── README.md                  # This file
 ```
 
 ## Configuration
+
+### Change PDF File
+Edit `vector.py` to use a different PDF:
+```python
+pdf_path = "your_document.pdf"  # Change filename here
+```
 
 ### Modify LLM Model
 Edit `main.py` to change the language model:
@@ -99,8 +123,15 @@ Edit `main.py` to change the language model:
 model = OllamaLLM(model="llama3.2")  # Change to your preferred model
 ```
 
+### Adjust Chunking Parameters
+Edit `vector.py` to change text splitting:
+```python
+def load_pdf(file_path, chunk_size=1000, chunk_overlap=200):
+    # Adjust chunk_size and chunk_overlap as needed
+```
+
 ### Adjust Retrieval Parameters
-Edit `vector.py` to change the number of retrieved reviews:
+Edit `vector.py` to change the number of retrieved chunks:
 ```python
 retriever = vector_store.as_retriever(search_kwargs={"k": 5})  # Change k value
 ```
@@ -109,36 +140,44 @@ retriever = vector_store.as_retriever(search_kwargs={"k": 5})  # Change k value
 Edit the template in `main.py`:
 ```python
 template = """
-You are an expert in answering questions about a pizza restaurant.
-Here are some relevant reviews: {reviews}
-Here is the question to answer: {question}
+You are a helpful assistant that answers questions based on provided documents.
+Context: {context}
+Question: {question}
 """
 ```
-
-## Data Format
-
-The CSV file should contain the following columns:
-
-- **Title**: Review title/summary
-- **Review**: Full review text
-- **Rating**: Numerical rating (e.g., 1-5 stars)
-- **Date**: Review date
 
 ## Technologies Used
 
 - **LangChain**: Framework for LLM applications
 - **Ollama**: Local LLM runtime
 - **ChromaDB**: Vector database for embeddings
-- **Pandas**: Data processing
+- **PyPDF**: PDF text extraction
 - **Python**: Core programming language
+
+## Troubleshooting
+
+### "Input length exceeds context length" Error
+- Your PDF pages are too large
+- The system automatically chunks text to prevent this
+- If you still see this error, reduce `chunk_size` in `vector.py`
+
+### Slow First Run
+- First run processes the entire PDF and creates embeddings
+- Subsequent runs are much faster due to caching
+- Large PDFs (100+ pages) may take several minutes
+
+### PDF Not Reloading
+- Delete `pdf_metadata.json` to force a reload
+- Or delete the entire `chroma_langchain_db/` directory
 
 ## Future Enhancements
 
+- [ ] Support for multiple PDF files
 - [ ] Web interface using Streamlit or Gradio
-- [ ] Support for multiple data sources
 - [ ] Conversation history and context
-- [ ] Advanced filtering by rating/date
 - [ ] Export conversation logs
+- [ ] Support for other document formats (DOCX, TXT, etc.)
+- [ ] Advanced filtering by page numbers
 - [ ] Multi-language support
 
 ## Contributing
