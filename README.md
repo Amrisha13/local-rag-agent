@@ -10,6 +10,7 @@ A Retrieval-Augmented Generation (RAG) chatbot that answers questions about PDF 
 - **Local LLM Integration**: Uses Ollama with Llama 3.2 for response generation
 - **Vector Database**: ChromaDB for efficient similarity search
 - **RAG Architecture**: Combines retrieval and generation for accurate, context-aware answers
+- **Conversation Memory**: Maintains chat history for context-aware follow-up questions
 - **Interactive CLI**: Simple command-line interface for asking questions
 
 ## Architecture
@@ -24,10 +25,12 @@ The project consists of two main components:
    - Provides a retriever interface for similarity search
 
 2. **Chat Interface (`main.py`)**:
-   - Interactive Q&A loop
+   - Interactive Q&A loop with conversation memory
+   - Maintains chat history for context-aware responses
    - Retrieves relevant document chunks based on user questions
    - Generates responses using Llama 3.2 LLM
    - Shows source and page numbers for transparency
+   - Commands: `q` (quit), `clear` (clear history), `history` (view conversation)
 
 ## Prerequisites
 
@@ -87,7 +90,21 @@ Question: Can you summarize the key points?
 Question: What does it say about [specific topic]?
 ```
 
-4. **Exit**: Type `q` to quit the application
+4. **Use Conversation Memory**:
+   - The system remembers previous questions and answers
+   - Ask follow-up questions naturally:
+   ```
+   Question: What is the main topic?
+   Answer: [Response about the topic]
+   
+   Question: Can you elaborate on that?  # Uses conversation context
+   Answer: [Contextual response based on previous answer]
+   ```
+
+5. **Special Commands**:
+   - Type `q` to quit the application
+   - Type `clear` to clear conversation history
+   - Type `history` to view the full conversation
 
 ## Smart Caching
 
@@ -170,15 +187,23 @@ Question: {question}
 - Delete `pdf_metadata.json` to force a reload
 - Or delete the entire `chroma_langchain_db/` directory
 
+## Recent Enhancements
+
+- [x] **Conversation Memory**: Maintains chat history for context-aware follow-up questions
+  - Remembers last 3 Q&A pairs (6 messages)
+  - Enables natural follow-up questions
+  - Commands to view and clear history
+
 ## Future Enhancements
 
 - [ ] Support for multiple PDF files
 - [ ] Web interface using Streamlit or Gradio
-- [ ] Conversation history and context
-- [ ] Export conversation logs
+- [ ] Export conversation logs to file
 - [ ] Support for other document formats (DOCX, TXT, etc.)
 - [ ] Advanced filtering by page numbers
 - [ ] Multi-language support
+- [ ] Conversation summarization
+- [ ] Persistent conversation storage
 
 ## Contributing
 
