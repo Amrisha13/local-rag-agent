@@ -3,3 +3,5 @@ langchain-ollama
 langchain-chroma
 langchain-community
 pandas
+streamlit
+pypdf
