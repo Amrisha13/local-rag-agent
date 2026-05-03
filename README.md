@@ -26,7 +26,7 @@ The project consists of three main components:
    - Tracks PDF modification time to avoid unnecessary reloading
    - Provides a retriever interface for similarity search
 
-2. **Web UI (`app.py`)** - **NEW!**:
+2. **Web UI (`app.py`)**:
    - Clean Streamlit interface for easy interaction
    - Real-time streaming responses with visual feedback
    - Conversation history with source citations
@@ -60,7 +60,7 @@ ollama pull mxbai-embed-large
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/Amrisha13/local-rag-agent.git
 cd local-rag-chat
 ```
 
@@ -109,19 +109,24 @@ streamlit run app.py
 
 ### Option 2: Command Line Interface
 
-1. **Start the CLI**:
+1. **Place Your PDF**:
+   - Add your PDF file to the project root directory
+   - Name it `sample.pdf` (or update the filename in `vector.py`)
+   - The system will automatically process it on first run
+
+2. **Start the CLI**:
 ```bash
 python main.py
 ```
 
-2. **Ask Questions**:
+3. **Ask Questions**:
 ```
 Question: What is the main topic of this document?
 Question: Can you summarize the key points?
 Question: What does it say about [specific topic]?
 ```
 
-3. **Use Conversation Memory**:
+4. **Use Conversation Memory**:
    - The system remembers previous questions and answers
    - Ask follow-up questions naturally:
    ```
@@ -158,7 +163,7 @@ Note: The web UI processes PDFs on-demand, so no caching is needed.
 ```
 local-rag-chat/
 ├── app.py                     # Streamlit web UI with PDF upload
-├── vector_utils.py            # PDF processing utilities (NEW!)
+├── vector_utils.py            # PDF processing utilities
 ├── main.py                    # CLI chat interface
 ├── vector.py                  # Vector store setup for CLI
 ├── requirements.txt           # Python dependencies
