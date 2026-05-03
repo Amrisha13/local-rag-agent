@@ -75,13 +75,9 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Place your PDF file in the project directory:
-   - Default filename: `sample.pdf`
-   - You can change this in `vector.py`
-
 ## Usage
 
-### Option 1: Web UI (Recommended)
+### Option 1: Web UI with PDF Upload (Recommended) 🆕
 
 1. **Start the Streamlit App**:
 ```bash
@@ -92,14 +88,24 @@ streamlit run app.py
    - The app will automatically open at `http://localhost:8501`
    - If not, navigate to the URL shown in the terminal
 
-3. **Use the Interface**:
-   - Type your question in the chat input at the bottom
+3. **Upload Your PDF**:
+   - Click "Browse files" in the sidebar
+   - Select your PDF document
+   - Click "🔄 Process PDF" to load and analyze it
+   - Wait for the processing to complete (may take a minute for large PDFs)
+
+4. **Start Chatting**:
+   - Once the PDF is loaded, type your question in the chat input
    - View streaming responses in real-time
-   - Click "View Sources" to see document citations
-   - Use the sidebar to:
-     - Clear conversation history
-     - View conversation statistics
-     - Access tips and information
+   - Click "View Sources" to see document citations with page numbers
+   - Ask follow-up questions naturally
+
+5. **Sidebar Features**:
+   - **Upload PDF**: Load new documents anytime
+   - **Current PDF**: See which document is loaded
+   - **Clear Conversation**: Reset chat history
+   - **Conversation Stats**: Track number of Q&A turns
+   - **Tips**: Quick help and suggestions
 
 ### Option 2: Command Line Interface
 
@@ -131,30 +137,34 @@ Question: What does it say about [specific topic]?
    - Type `clear` to clear conversation history
    - Type `history` to view the full conversation
 
-### First Run (Vector Store Creation)
-- On first run, the system will process your PDF
-- Text will be extracted, chunked, embedded, and stored in `./chroma_langchain_db/`
-- PDF metadata is saved in `pdf_metadata.json` to track changes
-- This process may take a few minutes depending on PDF size
+### PDF Processing Notes
+- When you upload a PDF, it will be processed automatically
+- Text is extracted, chunked, and embedded into a vector database
+- Processing time depends on PDF size (typically 30 seconds to 2 minutes)
+- Each new PDF upload clears the previous conversation history
+- You can upload different PDFs and switch between them anytime
 
-## Smart Caching
+## Smart Caching (CLI Mode)
 
-The system automatically detects when your PDF has changed:
+For the CLI interface (`main.py`), the system automatically detects when your PDF has changed:
 - **Same PDF**: Uses cached embeddings (instant startup)
 - **Modified PDF**: Automatically reloads and re-embeds the document
 - **New PDF**: Replace `sample.pdf` and the system will detect the change
+
+Note: The web UI processes PDFs on-demand, so no caching is needed.
 
 ## Project Structure
 
 ```
 local-rag-chat/
-├── app.py                     # Streamlit web UI (NEW!)
+├── app.py                     # Streamlit web UI with PDF upload
+├── vector_utils.py            # PDF processing utilities (NEW!)
 ├── main.py                    # CLI chat interface
-├── vector.py                  # Vector store setup and retriever
+├── vector.py                  # Vector store setup for CLI
 ├── requirements.txt           # Python dependencies
-├── sample.pdf                 # Your PDF document
-├── pdf_metadata.json          # PDF change tracking (auto-generated)
-├── chroma_langchain_db/       # ChromaDB vector store (auto-generated)
+├── sample.pdf                 # Sample PDF (for CLI mode)
+├── pdf_metadata.json          # PDF change tracking (CLI mode)
+├── chroma_langchain_db/       # ChromaDB vector store (CLI mode)
 └── README.md                  # This file
 ```
 
@@ -236,16 +246,23 @@ Question: {question}
   - Conversation management (clear, view stats)
   - Expandable source viewer
 
+- [x] **PDF Upload Feature** 🆕
+  - Upload PDFs directly through the web interface
+  - No need to manually place files in the project directory
+  - Automatic processing and embedding generation
+  - Switch between different PDFs easily
+  - Visual feedback during processing
+
 ## Future Enhancements
 
-- [ ] Support for multiple PDF files
+- [ ] Support for multiple PDF files simultaneously
 - [ ] Export conversation logs to file
 - [ ] Support for other document formats (DOCX, TXT, etc.)
 - [ ] Advanced filtering by page numbers
 - [ ] Multi-language support
 - [ ] Conversation summarization
 - [ ] Persistent conversation storage
-- [ ] PDF upload through web UI
+- [ ] Save/load uploaded PDFs for later use
 
 ## Contributing
 
